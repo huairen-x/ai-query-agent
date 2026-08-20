@@ -1,0 +1,116 @@
+{
+  "version": "1.0",
+  "name": "ai-query-agent",
+  "description": "智能问数系统 - NL2SQL Agent（模拟模式，无需 Hive 环境）",
+  "harness": {
+    "enabled": true,
+    "provider": "oh-my-openagent",
+    "config": {
+      "parallel_tool_calls": true,
+      "max_retries": 3,
+      "auto_approve": false,
+      "audit_log": true
+    }
+  },
+  "mcpServers": {
+    "hive-query": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["mcp-servers/mock_mcp_server.py"],
+      "description": "模拟查询执行器 - 使用 SQLite 内存数据，无需 Hive 环境"
+    },
+    "metadata": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["mcp-servers/mock_mcp_server.py"],
+      "description": "模拟元数据查询 - 使用 SQLite 内存数据，无需 Hive 环境"
+    }
+  },
+  "agents": {
+    "sisyphus": {
+      "role": "coordinator",
+      "description": "主控 Agent - 协调整个查询流程",
+      "system_prompt": "agents/sisyphus.md",
+      "sub_agents": ["librarian", "oracle", "validator"],
+      "skills": ["nl2sql"],
+      "config": {
+        "auto_retry": true,
+        "max_retries": 3
+      }
+    },
+    "librarian": {
+      "role": "worker",
+      "description": "元数据查询 Agent - 查询表结构、字段信息",
+      "system_prompt": "agents/librarian.md",
+      "tools": ["metadata.list_tables", "metadata.describe_table", "metadata.search_columns"],
+      "config": {
+        "auto_retry": true,
+        "max_retries": 2
+      }
+    },
+    "oracle": {
+      "role": "worker",
+      "description": "SQL 生成 Agent - 生成 Hive SQL 查询",
+      "system_prompt": "agents/oracle.md",
+      "skills": ["nl2sql"],
+      "config": {
+        "auto_retry": true,
+        "max_retries": 2
+      }
+    },
+    "validator": {
+      "role": "worker",
+      "description": "SQL 审查 Agent - 自动审查 SQL 质量",
+      "system_prompt": "agents/validator.md",
+      "tools": ["metadata.describe_table", "metadata.list_tables", "metadata.search_columns", "hive-query.validate_sql"],
+      "config": {
+        "auto_retry": true,
+        "max_retries": 2
+      }
+    }
+  },
+  "skills": {
+    "nl2sql": {
+      "description": "自然语言转 Hive SQL 技能",
+      "prompt_file": "skills/nl2sql.md",
+      "tools": ["hive-query.query_hive", "hive-query.validate_sql"]
+    }
+  },
+  "workflows": {
+    "query": {
+      "description": "智能问数标准工作流",
+      "steps": [
+        {
+          "name": "分析需求",
+          "agent": "sisyphus",
+          "action": "理解用户问题，提取查询要素"
+        },
+        {
+          "name": "查询元数据",
+          "agent": "librarian",
+          "action": "查找相关表结构、字段信息"
+        },
+        {
+          "name": "生成 SQL",
+          "agent": "oracle",
+          "action": "根据需求和元数据生成 SQL，并自我审查"
+        },
+        {
+          "name": "审查 SQL",
+          "agent": "validator",
+          "action": "自动审查 SQL 语法、逻辑、性能"
+        },
+        {
+          "name": "执行查询",
+          "agent": "sisyphus",
+          "action": "执行 SQL 并返回结果"
+        },
+        {
+          "name": "解读结果",
+          "agent": "sisyphus",
+          "action": "用自然语言解读查询结果"
+        }
+      ]
+    }
+  }
+}
