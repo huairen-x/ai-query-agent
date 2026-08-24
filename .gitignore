@@ -25,4 +25,4 @@ Thumbs.db
 
 # 测试临时文件
 tmp/
-temp/
+temp/.trae/
