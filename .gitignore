@@ -25,4 +25,8 @@ Thumbs.db
 
 # 测试临时文件
 tmp/
-temp/.trae/
+temp/
+.trae/
+
+# 独立子项目
+ops-agent/
