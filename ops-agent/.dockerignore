@@ -1,0 +1,54 @@
+# ============================================================
+# Docker 构建忽略
+# ============================================================
+
+# 版本控制
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
+
+# 测试
+tests/
+.pytest_cache/
+*.pytest_cache
+
+# 本地数据（运行时挂载卷）
+data/*.db
+data/*.sqlite
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 文档
+*.md
+docs/
+
+# 环境变量
+.env
+.env.local
+*.env
+
+# Docker
+.dockerignore
+
+# 构建脚本
+build.sh
+build.ps1
+
+# 系统
+.DS_Store
+Thumbs.db

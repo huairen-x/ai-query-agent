@@ -1,0 +1,72 @@
+{
+  "version": "1.0",
+  "name": "ops-agent",
+  "description": "智能运维 Agent - DolphinScheduler 工作流异常自动处理",
+  "harness": {
+    "enabled": true,
+    "provider": "oh-my-openagent",
+    "config": {
+      "parallel_tool_calls": true,
+      "max_retries": 3,
+      "auto_approve": false,
+      "audit_log": true
+    }
+  },
+  "mcpServers": {
+    "ds-monitor": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["ops-agent/mcp_servers/ds_monitor_server.py"],
+      "description": "监控数据采集 - 查询工作流状态、集群指标"
+    },
+    "ds-operator": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["ops-agent/mcp_servers/ds_operator_server.py"],
+      "description": "运维操作执行 - 重跑任务、扩缩容、调整优先级"
+    },
+    "knowledge": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["ops-agent/mcp_servers/knowledge_server.py"],
+      "description": "运维知识库 - 故障案例检索与记录"
+    }
+  },
+  "agents": {
+    "operator": {
+      "role": "coordinator",
+      "description": "智能运维 Agent - 7x24小时值守，异常自动处理",
+      "system_prompt": "ops-agent/agents/operator.md",
+      "skills": ["ops-runbook"],
+      "config": {
+        "auto_retry": true,
+        "max_retries": 3
+      }
+    }
+  },
+  "skills": {
+    "ops-runbook": {
+      "description": "运维应急预案 - 异常分类与处理方案",
+      "prompt_file": "ops-agent/agents/operator.md",
+      "tools": [
+        "ds-monitor.list_workflows",
+        "ds-monitor.get_workflow_status",
+        "ds-monitor.get_task_status",
+        "ds-monitor.get_task_log",
+        "ds-monitor.get_cluster_metrics",
+        "ds-monitor.get_worker_load",
+        "ds-monitor.get_queue_status",
+        "ds-monitor.get_workflow_dag",
+        "ds-operator.rerun_task",
+        "ds-operator.adjust_priority",
+        "ds-operator.kill_task",
+        "ds-operator.block_downstream",
+        "ds-operator.scale_worker",
+        "ds-operator.adjust_task_timeout",
+        "knowledge.search_similar",
+        "knowledge.record_case",
+        "knowledge.get_statistics"
+      ]
+    }
+  }
+}
