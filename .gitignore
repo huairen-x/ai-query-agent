@@ -4,12 +4,10 @@ __pycache__/
 *.egg-info/
 dist/
 build/
-*.pyc
 
 # 日志
-logs/
-debug.log
-*.log
+logs/*.log
+logs/*.log.*
 
 # 环境变量
 .env
@@ -27,19 +25,4 @@ Thumbs.db
 
 # 测试临时文件
 tmp/
-temp/
-.trae/
-
-# 开发/调试脚本
-fix_policy_and_run.py
-fix_policy.bat
-
-# Docker 构建产物
-ops-agent/result
-
-# Nix
-ops-agent/flake.lock
-
-# 数据库文件
-*.db
-*.sqlite
+temp/.trae/
